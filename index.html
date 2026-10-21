@@ -88,11 +88,28 @@
     width: min(520px, 92%); margin: 0 auto; cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  .logo-crop img {
+  .pup { position: relative; }
+  .pup img { user-select: none; -webkit-user-drag: none; }
+  /* the logo is 620x410; the tail sits at x 436-510, y 8-62.
+     The body hides that spot with a mask and the tail is drawn on top from the same image. */
+  .pup-body {
     display: block; width: 100%; height: auto;
-    user-select: none; -webkit-user-drag: none;
+    -webkit-mask: linear-gradient(#000 0 0) 0 0 / 100% 100% no-repeat, linear-gradient(#000 0 0) 80.108% 2.228% / 10.806% 12.439% no-repeat;
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) 0 0 / 100% 100% no-repeat exclude, linear-gradient(#000 0 0) 80.108% 2.228% / 10.806% 12.439% no-repeat;
   }
-  .logo-crop:hover img { animation: trot .45s ease-in-out infinite; }
+  .pup-tail {
+    position: absolute; left: 70.323%; top: 1.951%; width: 11.935%; aspect-ratio: 74 / 54;
+    background: url(dilipets-logo.png) 79.853% 2.247% / 837.84% auto no-repeat;
+    transform-origin: 32% 100%;
+    animation: wag .6s ease-in-out infinite alternate;
+  }
+  @keyframes wag {
+    from { transform: skewX(-14deg); }
+    to { transform: skewX(14deg); }
+  }
+  .logo-crop:hover .pup { animation: trot .45s ease-in-out infinite; }
+  .logo-crop:hover .pup-tail, .logo-crop.happy .pup-tail { animation-duration: .16s; }
   @keyframes trot {
     0%, 100% { transform: translate(0, 0) rotate(0); }
     25% { transform: translate(3px, -5px) rotate(-1deg); }
@@ -288,7 +305,10 @@
 
   <div class="wrap">
     <div class="logo-crop" id="petMe" role="button" tabindex="0" aria-label="Pet the dog">
-      <img src="dilipets-logo.png" alt="Dilipets, UWC Dilijan" draggable="false">
+      <div class="pup">
+        <img class="pup-body" src="dilipets-logo.png" alt="Dilipets, UWC Dilijan" draggable="false">
+        <div class="pup-tail" aria-hidden="true"></div>
+      </div>
     </div>
     <p class="tagline">Full bowls, warm beds and kind hands for the dogs of Dilijan</p>
     <p class="lead">We're a CAS service project run by students of UWC Dilijan. We feed, care for and look out for neglected and abandoned dogs in our town.</p>
@@ -538,6 +558,9 @@
   function pet(x, y) {
     pets++;
     countEl.textContent = pets;
+    pup.classList.add("happy");
+    clearTimeout(pet.timer);
+    pet.timer = setTimeout(() => pup.classList.remove("happy"), 1500);
     try { localStorage.setItem("dilipets-pets", pets); } catch (e) {}
     for (let i = 0; i < 4; i++) {
       const h = document.createElement("span");
